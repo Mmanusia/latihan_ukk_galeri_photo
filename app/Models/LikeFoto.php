@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class LikeFoto extends Model
+{
+    protected $table = 'likefoto';
+
+    public $timestamps = false;
+
+    protected $fillable = [
+        'FotoID',
+        'UserID',
+        'TanggalLike',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'TanggalLike' => 'date',
+        ];
+    }
+    
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'UserID');
+    }
+
+    public function foto()
+    {
+        return $this->belongsTo(Foto::class, 'FotoID');
+    }
+}
