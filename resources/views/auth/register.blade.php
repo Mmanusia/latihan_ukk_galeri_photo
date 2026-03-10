@@ -1,57 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>register</title>
-</head>
+@extends('layouts.app')
 
-<body>
-    <h4>Register</h4>
-    <form action="{{ route('register') }}" method="POST">
-        @csrf
-        <p>Nama Lengkap</p>
-        <input type="text" name="namalengkap" placeholder="Masukan Nama Lengkap">
-        @error('namalengkap')
-        <p>
-            {{ $message }}
-        </p>
-        @enderror
-        
-        <p>Username</p>
-        <input type="text" name="username" value="" placeholder="Masukan Username">
-        @error('username')
-        <p>
-            {{ $message }}
-        </p>
-        @enderror
+@section('title', 'Register')
 
-        <p>Email</p>
-        <input type="email" name="email" value="" placeholder="Masukan Email">
-        @error('email')
-        <p>
-            {{ $message }}
-        </p>
-        @enderror
+@section('content')
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="card-body p-4">
+            <h1>Register</h1>
+            <form action="{{ route('register') }}" method="POST">
+                @csrf
 
-        <p>Alamat</p>
-        <textarea name="alamat" cols="30" rows="10" placeholder="Masukan Alamat"></textarea>
-        @error('alamat')
-        <p>
-            {{ $message }}
-        </p>
-        @enderror
+                <div class="mb-3">
+                    <label class="form-label" for="namalengkap">Nama Lengkap</label>
+                    <input class="form-control" id="namalengkap" type="text" name="namalengkap"
+                        value="{{ old('namalengkap') }}" placeholder="Masukkan nama lengkap">
+                    @error('namalengkap')
+                    <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
 
-        <p>Password</p>
-        <input type="password" name="password" value="" placeholder="Masukan Password">
-        @error('password')
-        <p>
-            {{ $message }}
-        </p>
-        @enderror
+                <div class="mb-3">
+                    <label class="form-label" for="username">Username</label>
+                    <input class="form-control" id="username" type="text" name="username" value="{{ old('username') }}"
+                        placeholder="Masukkan username">
+                    @error('username')
+                    <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
 
-        <p>Konfirmasi Password</p>
-        <input type="password" name="password_confirmation" placeholder="Masukan Konfirmasi Password">
-    
-        <input type="submit">
-    </form>
-</body>
-</html>
+                <div class="mb-3">
+                    <label class="form-label" for="email">Email</label>
+                    <input class="form-control" id="email" type="email" name="email" value="{{ old('email') }}"
+                        placeholder="Masukkan email">
+                    @error('email')
+                    <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="alamat">Alamat</label>
+                    <textarea class="form-control" id="alamat" name="alamat" rows="4"
+                        placeholder="Masukkan alamat">{{ old('alamat') }}</textarea>
+                    @error('alamat')
+                    <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="password">Password</label>
+                    <input class="form-control" id="password" type="password" name="password"
+                        placeholder="Masukkan password">
+                    @error('password')
+                    <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label" for="password_confirmation">Konfirmasi Password</label>
+                    <input class="form-control" id="password_confirmation" type="password" name="password_confirmation"
+                        placeholder="Masukkan konfirmasi password">
+                </div>
+
+                <button class="btn btn-primary w-100" type="submit">Daftar</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+@endsection

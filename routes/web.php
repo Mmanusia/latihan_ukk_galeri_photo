@@ -4,13 +4,10 @@ use App\Http\Controllers\FotoController;
 use App\Http\Controllers\AlbumController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/index', [FotoController::class, 'index'])->name('index');
-Route::get('/home', [FotoController::class, 'index'])->name('index');
+Route::get('/', [FotoController::class, 'index'])->name('index');
+Route::redirect('/index', '/');
+Route::redirect('/home', '/');
 Route::get('/detail/{foto}', [FotoController::class, 'detail'])->name('foto.detail');
-
-Route::get('/', function(){
-    return view('welcome');
-});
 
 Route::middleware('auth')->group(function () {
     // Album

@@ -1,44 +1,56 @@
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+x6f068xJ3L820s3a" crossorigin="anonymous">
-    
-    <a href="{{ route('index') }}">Kembali ke galeri</a>
+@extends('layouts.app')
+
+@section('title', 'Tambah Foto')
+
+@section('content')
+<div class="container py-4 py-md-5">
+    <div class="row justify-content-center">
+        <h1>Tambah Foto</h1>
+        <a class="btn btn-outline-primary" href="{{ route('index') }}">Kembali ke galeri</a>
+    </div>
+
     @auth
-    <form action="{{ route('foto.tambah') }}" method="POST" enctype="multipart/form-data">
-        @csrf
+    <div class="card-body p-3">
+        <form action="{{ route('foto.tambah') }}" method="POST" enctype="multipart/form-data">
+            @csrf
 
-        <hr>
-        <label for="JudulFoto">Judul Foto</label>
-        <input id="JudulFoto" name="JudulFoto" type="text" value="{{ old('JudulFoto') }}"
-            placeholder="Contoh: Plers Mabur">
+            <div class="mb-3">
+                <label for="JudulFoto" class="form-label">Judul Foto</label>
+                <input id="JudulFoto" name="JudulFoto" type="text" class="form-control" value="{{ old('JudulFoto') }}"
+                    placeholder="Masukan judul foto">
+            </div>
 
+            <div class="mb-3">
+                <label for="NamaAlbum" class="form-label">Album</label>
+                <select id="NamaAlbum" name="AlbumID" class="form-select" required>
+                    <option value="" disabled {{ old('AlbumID') ? '' : 'selected' }}>Pilih album</option>
+                    @forelse ($albums as $album)
+                    <option value="{{ $album->id }}" {{ old('AlbumID') == $album->id ? 'selected' : '' }}>
+                        {{ $album->NamaAlbum }}
+                    </option>
+                    @empty
+                    <option value="" disabled selected>Belum ada album, silakan tambah album dulu.</option>
+                    @endforelse
+                </select>
+            </div>
 
-        <hr>
-        <label for="NamaAlbum">Album</label>
-        <select id="NamaAlbum" name="AlbumID" required>
-            <option value="" disabled {{ old('AlbumID') ? '' : 'selected' }}>Pilih album</option>
-            @forelse ($albums as $album)
-                <option value="{{ $album->id }}" {{ old('AlbumID') == $album->id ? 'selected' : '' }}>
-                    {{ $album->NamaAlbum }}
-                </option>
-            @empty
-                <option value="" disabled selected>Belum ada album, silakan tambah album dulu.</option>
-            @endforelse
-        </select>
-        <hr>
-        <label for="DeskripsiFoto">Deskripsi</label>
-        <textarea id="DeskripsiFoto" name="DeskripsiFoto" rows="4"
-            placeholder="Tambahkan keterangan singkat foto">{{ old('DeskripsiFoto') }}</textarea>
+            <div class="mb-3">
+                <label for="DeskripsiFoto" class="form-label">Deskripsi</label>
+                <textarea id="DeskripsiFoto" name="DeskripsiFoto" rows="4" class="form-control"
+                    placeholder="Tambahkan keterangan singkat foto">{{ old('DeskripsiFoto') }}</textarea>
+            </div>
 
+            <div class="mb-4">
+                <label for="file_foto" class="form-label">File Foto</label>
+                <input id="file_foto" name="file_foto" type="file" class="form-control" accept="image/*">
+                <div class="form-text">Format gambar umum didukung, maksimal 5 MB.</div>
+            </div>
 
-        <hr>
-        <label for="file_foto">File Foto</label>
-        <input id="file_foto" name="file_foto" type="file" accept="image/*">
-        <p>Format gambar umum didukung, maksimal 5 MB.</p>
+            <button type="submit" class="btn btn-success">Upload Sekarang</button>
+        </form>
+    </div>
 
-
-        <button type="submit">
-            Upload Sekarang
-        </button>
-    </form>
-    @else
-    
     @endauth
+</div>
+</div>
+@endsection

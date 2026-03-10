@@ -1,97 +1,111 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('layouts.app')
 
-<head>
-    <title>Foto Galeri</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-</head>
+@section('title', 'Foto Galeri')
 
-<body>
-    <header>
-        <h1>Upload foto dan lihat galeri</h1>
-        <a href="{{ route('logout') }}" style="cursor: pointer" onclick="event.preventDefault();
-        document.getElementById('logout-form').submit();" class="btn btn-md btn-primary">LOGOUT</a>
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-        @csrf
-        </form>
+@section('content')
+<div class="container py-4 py-md-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1>Foto Galeri</h1>
+        </div>
 
-        <p>bisa unggah foto</p>
+        <div class="d-flex gap-2">
+            @auth
+            <a href="{{ route('logout') }}" class="btn btn-outline-danger"
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                Logout
+            </a>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                @csrf
+            </form>
+            @else
+            @if (Route::has('login'))
+            <a href="{{ route('login') }}" class="btn btn-outline-primary">Login</a>
+            @endif
+            @endauth
+        </div>
+    </div>
 
-        <p>{{ $fotos->count() }}</p>
-        <p>Total Foto</p>
-        <hr>
-        <p>{{ $fotos->pluck('AlbumID')->unique()->count() }}</p>
-        <p>Total Album</p>
-    </header>
+    <div class="row g-3">
+        <div class="border rounded-3 p-3">
+            <p>Total Foto</p>
+            <p class="fs-4 fw-semibold mb-0">{{ $fotos->count() }}</p>
+        </div>
+        <div class="border rounded-3 p-3">
+            <p>Total Album</p>
+            <p class="fs-4 fw-semibold mb-0">{{ $fotos->pluck('AlbumID')->unique()->count() }}</p>
+        </div>
+        <div class="border rounded-3 p-3">
+            <p>Album Baru</p>
+            @auth
+            <a class="btn btn-primary btn-sm mt-2" href="/tambahAlbum">Tambah Album</a>
+            @else
+            <p>Login untuk menambah album.</p>
+            @endauth
+        </div>
+        <div class="border rounded-3 p-3">
+            <p>Upload Foto</p>
+            @auth
+            <a class="btn btn-dark btn-sm mt-2" href="/tambah">Tambah Foto</a>
+            @else
+            <p class="small text-secondary mb-0 mt-2">Guest hanya bisa melihat galeri.</p>
+            @endauth
+        </div>
+    </div>
 
     @if (session('success'))
-    <div>
+    <div class="alert alert-success shadow-sm" role="alert">
         {{ session('success') }}
     </div>
     @endif
 
     @if ($errors->any())
-    <p>Data upload belum valid:</p>
-    <ul>
-        @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-        @endforeach
-    </ul>
+    <div class="alert alert-danger shadow-sm" role="alert">
+        <p class="fw-semibold mb-2">Data upload belum valid:</p>
+        <ul class="mb-0 ps-3">
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
     @endif
 
-    <hr>
-    <h2>Tambah Album</h2>
-    <p>untuk mengunggah album, login dahulu!</p>
-    <a class="btn btn-primary"  href="/tambahAlbum">Tambah Album Foto</a>
 
-    <hr>
-    <h2>Unggah Foto</h2>
-    <p>untuk mengunggah foto, login dahulu!</p>
-    <a class="btn btn-primary"  href="/tambah">Tambah Foto</a>
-    
-{{-- 
-    <hr>
-    <p>Pengunjung bisa melihat semua foto.</p>
+    <h2 class="h4 mb-1">Galeri Foto</h2>
+    <p class="text-secondary mb-0">Semua foto terbaru tampil di bawah ini.</p>
 
-    @if (Route::has('login'))
-    <a href="{{ route('login') }}">Login</a>
-    @endif --}}
-
-
-    <hr>
-    <h2>Galeri Foto</h2>
-    <p>Semua foto terbaru tampil di bawah ini.</p>
-
-    <div class="card text-center" style="width: 18rem;">
+    <div class="row g-4">
         @forelse ($fotos as $foto)
-        <a href="{{ route('foto.detail', $foto) }}">
-            <img src="{{ asset($foto->LokasiFile) }}" alt="{{ $foto->JudulFoto }}" width="150" height="100" class="card-img-top">
-        </a>
-        <div class="card-body">
-            <h5 class="card-title">{{ $foto->JudulFoto }}</h5>
-            <p class="card-text">{{ $foto->likes_count }} Like</p>
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="card border-1">
+                <a href="{{ route('foto.detail', $foto) }}" class="text-decoration-none text-dark">
+                    <img src="{{ asset($foto->LokasiFile) }}" alt="{{ $foto->JudulFoto }}" class="card-img-top"
+                        style="height: 220px; object-fit: cover;">
+                </a>
+
+                <div class="card-body">
+                    <h5>{{ $foto->JudulFoto }}</h5>
+                    <p class="card-text text-secondary mb-0">{{ $foto->likes_count }} Like</p>
+                </div>
+
+                @auth
+                @if (auth()->user()->isAdmin())
+                <form action="{{ route('foto.destroy', $foto) }}" method="POST"
+                    onsubmit="return confirm('Yakin ingin menghapus foto ini?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                        Hapus Foto
+                    </button>
+                </form>
+                @endif
+                @endauth
+            </div>
         </div>
+        @empty
+        <h5>Belum ada foto</h5>
+        <p class="text-secondary mb-0">Silakan tambahkan foto baru untuk mulai mengisi galeri.</p>
+        @endforelse
     </div>
-    <hr>
-
-    @auth
-    @if (auth()->user()->isAdmin())
-    <form action="{{ route('foto.destroy', $foto) }}" method="POST"
-        onsubmit="return confirm('Yakin ingin menghapus foto ini?');">
-        @csrf
-        @method('DELETE')
-        <button type="submit">
-            Hapus Foto?
-        </button>
-    </form>
-    @endif
-    @endauth
-
-    @empty
-    <h3>Belum ada foto</h3>
-    @endforelse
-    </section>
-    </div>
-    </div>
-
-</body>
+</div>
+@endsection

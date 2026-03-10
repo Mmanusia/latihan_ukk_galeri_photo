@@ -52,7 +52,7 @@ class FotoController extends Controller
     $validated = $request->validate([
         'JudulFoto' => ['required', 'string', 'max:255'],
         'DeskripsiFoto' => ['nullable', 'string'],
-        'AlbumID' => ['required', 'exists:albums,id'],
+        'AlbumID' => ['required', 'exists:album,id'],
         'file_foto' => ['required', 'image', 'max:5120'],
     ]);
 

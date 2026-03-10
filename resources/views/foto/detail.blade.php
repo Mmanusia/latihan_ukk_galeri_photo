@@ -1,85 +1,88 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('layouts.app')
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Detail Foto</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-</head>
+@section('title', 'Detail Foto')
 
-<body>
-    <a href="{{ route('index') }}" class="btn btn-primary">Kembali ke galeri</a>
+@section('content')
+<div class="container py-4 py-md-5">
+    <h1>Detail Foto</h1>
+    <a href="{{ route('index') }}" class="btn btn-outline-primary">Kembali ke galeri</a>
 
     @if (session('success'))
-        <div>{{ session('success') }}</div>
+    <div class="alert alert-success shadow-sm">{{ session('success') }}</div>
     @endif
 
     @if ($errors->any())
-        <p>Terjadi kesalahan:</p>
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+    <p class="fw-semibold mb-2">Terjadi kesalahan:</p>
+    <ul class="mb-0 ps-3">
+        @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
     @endif
 
-    <h1>{{ $foto->JudulFoto }}</h1>
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <img src="{{ asset($foto->LokasiFile) }}" alt="{{ $foto->JudulFoto }}" class="card-img-top"
+                style="max-height: 520px; object-fit: cover;">
+            <div class="card-body">
+                <h2 class="h4 mb-3">{{ $foto->JudulFoto }}</h2>
+                <p class="mb-2">Album: {{ $foto->album?->NamaAlbum ?? 'Tanpa Album' }}</p>
+                <p class="mb-2">Upload: {{ optional($foto->TanggalUnggah)->format('d M Y') ?? '-' }}</p>
+                <p class="mb-3">Oleh: {{ $foto->user?->username ?? 'User' }}</p>
+                <p class="mb-3">{{ $foto->DeskripsiFoto ?: 'Foto ini belum memiliki deskripsi.' }}
+                </p>
+                <span>{{ $foto->likes_count }} like</span>
+                <span>{{ $foto->komentars_count }} komentar</span>
 
-    <img src="{{ asset($foto->LokasiFile) }}" alt="{{ $foto->JudulFoto }}" style="max-width: 500px; height" class="img-fluid align-middle">
+                @auth
+                <div class="d-flex gap-2 flex-wrap">
+                    <form action="{{ route('foto.like', $foto) }}" method="POST">
+                        @csrf
+                        <button class="btn btn-primary"
+                            type="submit">{{ in_array($foto->id, $likedFotoIds, true) ? 'Batal Like' : 'Like Foto' }}</button>
+                    </form>
 
-    <hr>
-    <p>Album: {{ $foto->album?->NamaAlbum ?? 'Tanpa Album' }}</p>
-    <p>Upload: {{ optional($foto->TanggalUnggah)->format('d M Y') ?? '-' }}</p>
-    <p>Oleh: {{ $foto->user?->username ?? 'User' }}</p>
-
-    <hr>
-    <p>Deskripsi: {{ $foto->DeskripsiFoto ?: 'Foto ini belum memiliki deskripsi.' }}</p>
-    <p>{{ $foto->likes_count }} like</p>
-    <p>{{ $foto->komentars_count }} komentar</p>
-
-    @auth
-        <form action="{{ route('foto.like', $foto) }}" method="POST">
-            @csrf
-            <button class="btn btn-primary" type="submit">{{ in_array($foto->id, $likedFotoIds, true) ? 'Batal Like' : 'Like Foto' }}</button>
-        </form>
-
-        @if (auth()->user()->isAdmin())
-            <form action="{{ route('foto.destroy', $foto) }}" method="POST"
-                onsubmit="return confirm('Yakin ingin menghapus foto ini?');">
-                @csrf
-                @method('DELETE')
-                <button class="btn btn-danger" type="submit">Hapus Foto</button>
-            </form>
-        @endif
-    @endauth
-
-    <hr>
-    <h2>Komentar</h2>
-
-    @forelse ($foto->komentars as $komentar)
-        <div>
-            <p>{{ $komentar->user?->username ?? 'User' }}</p>
-            <p>{{ optional($komentar->TanggalKomentar)->format('d M Y') ?? '-' }}</p>
-            <p>{{ $komentar->IsiKomentar }}</p>
-            <hr>
+                    @if (auth()->user()->isAdmin())
+                    <form action="{{ route('foto.destroy', $foto) }}" method="POST"
+                        onsubmit="return confirm('Yakin ingin menghapus foto ini?');">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-outline-danger" type="submit">Hapus Foto</button>
+                    </form>
+                    @endif
+                </div>
+                @endauth
+            </div>
         </div>
-    @empty
-        <p>Belum ada komentar untuk foto ini.</p>
-    @endforelse
 
-    <h2>Tambah Komentar</h2>
+        <div class="col-lg-5">
+            <h3 class="h5 mb-3">Komentar</h3>
 
-    @auth
-        <form action="{{ route('foto.komen', $foto) }}" method="POST">
-            @csrf
-            <textarea class="form-control" name="IsiKomentar" rows="4" placeholder="Tulis komentar untuk foto ini..."></textarea>
-            <br>
-            <button class="btn btn-success" type="submit">Kirim Komentar</button>
-        </form>
-    @else
-        <p><a class="btn btn-primary" href="/login">Login</a> dulu untuk memberi komentar dan like.</p>
-    @endauth
-</body>
+            @forelse ($foto->komentars as $komentar)
+            <div class="border-bottom pb-3 mb-3">
+                <p class="fw-semibold mb-1">{{ $komentar->user?->username ?? 'User' }}</p>
+                <p class="small text-secondary mb-2">
+                    {{ optional($komentar->TanggalKomentar)->format('d M Y') ?? '-' }}</p>
+                <p class="mb-0">{{ $komentar->IsiKomentar }}</p>
+            </div>
+            @empty
+            <p class="text-secondary mb-0">Belum ada komentar untuk foto ini.</p>
+            @endforelse
 
-</html>
+            <h3 class="h5 mb-3">Tambah Komentar</h3>
+
+            @auth
+            <form action="{{ route('foto.komen', $foto) }}" method="POST">
+                @csrf
+                <textarea class="form-control mb-3" name="IsiKomentar" rows="4"
+                    placeholder="Tulis komentar untuk foto ini..."></textarea>
+                <button class="btn btn-success" type="submit">Kirim Komentar</button>
+            </form>
+            @else
+            <p class="mb-0"><a class="btn btn-primary" href="/login">Login</a> dulu untuk memberi komentar dan
+                like.</p>
+            @endauth
+        </div>
+    </div>
+</div>
+@endsection
